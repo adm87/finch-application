@@ -5,6 +5,7 @@ import (
 
 	"github.com/adm87/finch-application/config"
 	"github.com/adm87/finch-core/ecs"
+	"github.com/adm87/finch-core/time"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -102,6 +103,19 @@ func (app *Application) Open() error {
 	return ebiten.RunGame(app)
 }
 
+func (app *Application) Quit() {
+	app.shouldExit = true
+}
+
+func (app *Application) internal_shutdown() error {
+	if app.shutdownFunc != nil {
+		if err := app.shutdownFunc(app); err != nil {
+			return err
+		}
+	}
+	return ebiten.Termination
+}
+
 // === Ebiten Game Interface ===
 
 func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -115,11 +129,12 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (app *Application) Draw(screen *ebiten.Image) {
 	screen.Fill(app.clearColor)
+	app.world.Render(screen, ebiten.GeoM{})
 }
 
 func (app *Application) Update() error {
 	if app.shouldExit {
-		return ebiten.Termination
+		return app.internal_shutdown()
 	}
-	return nil
+	return app.world.Update(time.Time{})
 }
