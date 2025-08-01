@@ -1,0 +1,15 @@
+*
+
+!.gitignore
+
+!go.mod
+!go.sum
+
+!README.md
+!LICENSE
+
+!application/
+!application/**/*
+
+!config/
+!config/**/*
