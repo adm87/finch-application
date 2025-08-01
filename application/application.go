@@ -129,7 +129,7 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (app *Application) Draw(screen *ebiten.Image) {
 	screen.Fill(app.clearColor)
-	app.world.Render(screen, ebiten.GeoM{})
+	app.world.Render(screen)
 }
 
 func (app *Application) Update() error {
