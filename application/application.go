@@ -5,6 +5,7 @@ import (
 
 	"github.com/adm87/finch-application/config"
 	"github.com/adm87/finch-core/ecs"
+	"github.com/adm87/finch-core/errors"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -69,4 +70,20 @@ func (app *Application) WithStartup(fn func(app *Application) error) *Applicatio
 func (app *Application) WithShutdown(fn func(app *Application) error) *Application {
 	app.shutdownFunc = fn
 	return app
+}
+
+func (app *Application) Cache() *storage.ResourceCache {
+	return app.cache
+}
+
+func (app *Application) World() *ecs.World {
+	return app.world
+}
+
+func (app *Application) Config() *ApplicationConfig {
+	return app.config
+}
+
+func (app *Application) Open() error {
+	return errors.NewNotImplementedError("Application.Open method is not implemented")
 }
