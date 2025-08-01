@@ -5,7 +5,6 @@ import (
 
 	"github.com/adm87/finch-application/config"
 	"github.com/adm87/finch-core/ecs"
-	"github.com/adm87/finch-core/errors"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -19,13 +18,14 @@ type ApplicationConfig struct {
 type Application struct {
 	config *ApplicationConfig
 
-	startupFunc  func(app *Application) error
+	startupFunc  func(app *Application) error // Called before the ebiten window is opened
 	shutdownFunc func(app *Application) error
 
 	cache *storage.ResourceCache
 	world *ecs.World
 
 	shouldExit bool
+	clearColor color.RGBA
 }
 
 func NewApplication() *Application {
@@ -59,6 +59,7 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 		cache:      storage.NewResourceCache(),
 		world:      ecs.NewWorld(),
 		shouldExit: false,
+		clearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 	}
 }
 
@@ -85,5 +86,40 @@ func (app *Application) Config() *ApplicationConfig {
 }
 
 func (app *Application) Open() error {
-	return errors.NewNotImplementedError("Application.Open method is not implemented")
+	if window := app.Config().Window; window != nil {
+		ebiten.SetWindowTitle(window.Title)
+		ebiten.SetWindowSize(window.Width, window.Height)
+		ebiten.SetWindowResizingMode(window.ResizeMode)
+		ebiten.SetFullscreen(window.Fullscreen)
+
+		app.clearColor = window.ClearColor
+	}
+	if app.startupFunc != nil {
+		if err := app.startupFunc(app); err != nil {
+			return err
+		}
+	}
+	return ebiten.RunGame(app)
+}
+
+// === Ebiten Game Interface ===
+
+func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
+	if window := app.Config().Window; window != nil {
+		window.ScreenWidth = float32(outsideWidth) * window.RenderScale
+		window.ScreenHeight = float32(outsideHeight) * window.RenderScale
+		return int(window.ScreenWidth), int(window.ScreenHeight)
+	}
+	return outsideWidth, outsideHeight
+}
+
+func (app *Application) Draw(screen *ebiten.Image) {
+	screen.Fill(app.clearColor)
+}
+
+func (app *Application) Update() error {
+	if app.shouldExit {
+		return ebiten.Termination
+	}
+	return nil
 }

@@ -3,6 +3,7 @@ package application
 import (
 	"path/filepath"
 
+	"github.com/adm87/finch-core/errors"
 	"github.com/adm87/finch-resources/manifest"
 	"github.com/spf13/cobra"
 )
@@ -11,11 +12,27 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: use,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if metadata := app.Config().Metadata; metadata == nil {
+				return errors.NewInvalidArgumentError("application metadata must be set")
+			}
+
 			root, err := filepath.Abs(app.Config().Root)
 			if err != nil {
 				return err
 			}
 			app.Config().Root = root
+
+			if window := app.Config().Window; window != nil {
+				if window.Width <= 0 || window.Height <= 0 {
+					return errors.NewInvalidArgumentError("window width and height must be non-zero positive integers")
+				}
+				if window.RenderScale <= 0 {
+					return errors.NewInvalidArgumentError("window render scale must be a non-zero positive integer")
+				}
+
+				window.ScreenWidth = float32(window.Width) * window.RenderScale
+				window.ScreenHeight = float32(window.Height) * window.RenderScale
+			}
 
 			if resources := app.Config().Resources; resources != nil {
 				resources.Path = filepath.Join(root, resources.Path)
