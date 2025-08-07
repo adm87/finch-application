@@ -4,8 +4,8 @@ import (
 	"image/color"
 
 	"github.com/adm87/finch-application/config"
+	"github.com/adm87/finch-application/time"
 	"github.com/adm87/finch-core/ecs"
-	"github.com/adm87/finch-core/time"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -19,11 +19,12 @@ type ApplicationConfig struct {
 type Application struct {
 	config *ApplicationConfig
 
-	startupFunc  func(app *Application) error // Called before the ebiten window is opened
+	startupFunc  func(app *Application) error
 	shutdownFunc func(app *Application) error
 
 	cache *storage.ResourceCache
 	world *ecs.World
+	fps   *time.FPS
 
 	shouldExit bool
 	clearColor color.RGBA
@@ -32,9 +33,10 @@ type Application struct {
 func NewApplication() *Application {
 	return NewApplicationWithConfig(&ApplicationConfig{
 		Metadata: &config.Metadata{
-			Name:    "Finch",
-			Version: "1.0.0",
-			Root:    "/path/to/finch",
+			Name:      "Finch",
+			Version:   "1.0.0",
+			Root:      "/path/to/finch",
+			TargetFps: 30,
 		},
 		Resources: &config.Resources{
 			Path:         "/path/to/resources",
@@ -59,6 +61,7 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 		config:     config,
 		cache:      storage.NewResourceCache(),
 		world:      ecs.NewWorld(),
+		fps:        time.NewFPS(config.TargetFps),
 		shouldExit: false,
 		clearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 	}
@@ -124,17 +127,45 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 		window.ScreenHeight = float32(outsideHeight) * window.RenderScale
 		return int(window.ScreenWidth), int(window.ScreenHeight)
 	}
+
 	return outsideWidth, outsideHeight
 }
 
 func (app *Application) Draw(screen *ebiten.Image) {
 	screen.Fill(app.clearColor)
-	app.world.Render(screen)
+
+	app.world.Render(screen, app.fps.Interpolation())
 }
 
 func (app *Application) Update() error {
 	if app.shouldExit {
 		return app.internal_shutdown()
 	}
-	return app.world.Update(time.Time{})
+
+	frames := app.fps.Update()
+
+	if err := app.world.EarlyUpdate(app.fps.DeltaSeconds()); err != nil {
+		return err
+	}
+
+	if frames > 0 {
+		const maxFixedUpdates = 5
+		if frames > maxFixedUpdates {
+			frames = maxFixedUpdates
+		}
+
+		fixedDeltaSeconds := app.fps.FixedDeltaSeconds()
+
+		for i := 0; i < frames; i++ {
+			if err := app.world.FixedUpdate(fixedDeltaSeconds); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := app.world.LateUpdate(app.fps.DeltaSeconds()); err != nil {
+		return err
+	}
+
+	return nil
 }

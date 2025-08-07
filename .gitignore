@@ -13,3 +13,6 @@
 
 !config/
 !config/**/*
+
+!time/
+!time/**/*
