@@ -61,7 +61,7 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 		config:     config,
 		cache:      storage.NewResourceCache(),
 		world:      ecs.NewWorld(),
-		fps:        time.NewFPS(config.TargetFps),
+		fps:        time.NewFPS(config.TargetFps, 5),
 		shouldExit: false,
 		clearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 	}
@@ -145,27 +145,5 @@ func (app *Application) Update() error {
 
 	fixedFrames := app.fps.Update()
 
-	if err := app.world.EarlyUpdate(app.fps.DeltaSeconds()); err != nil {
-		return err
-	}
-
-	if fixedFrames > 0 {
-		const maxFixedUpdates = 5
-		if fixedFrames > maxFixedUpdates {
-			fixedFrames = maxFixedUpdates
-		}
-
-		fixedDeltaSeconds := app.fps.FixedDeltaSeconds()
-		for i := 0; i < fixedFrames; i++ {
-			if err := app.world.FixedUpdate(fixedDeltaSeconds); err != nil {
-				return err
-			}
-		}
-	}
-
-	if err := app.world.LateUpdate(app.fps.DeltaSeconds()); err != nil {
-		return err
-	}
-
-	return nil
+	return app.world.Update(app.fps.DeltaSeconds(), app.fps.FixedDeltaSeconds(), fixedFrames)
 }

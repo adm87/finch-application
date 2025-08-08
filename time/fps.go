@@ -18,16 +18,21 @@ type FPS struct {
 	lastFpsUpdate     float64
 	fps               float64
 	frameCount        int
+	maxFrames         int
 }
 
-func NewFPS(target int) *FPS {
+func NewFPS(target int, maxFrames int) *FPS {
 	if target <= 0 {
 		panic(errors.NewInvalidArgumentError("target FPS must be greater than 0"))
+	}
+	if maxFrames <= 0 {
+		panic(errors.NewInvalidArgumentError("max frames must be greater than 0"))
 	}
 	targetMs := 1000.0 / float64(target)
 	return &FPS{
 		targetMs:          targetMs,
 		fixedDeltaSeconds: targetMs / 1000.0,
+		maxFrames:         maxFrames,
 	}
 }
 
@@ -68,6 +73,10 @@ func (f *FPS) Update() (frames int) {
 	frames = int(stdmath.Floor(f.elapsedTime / f.targetMs))
 	if frames > 0 {
 		f.elapsedTime -= float64(frames) * f.targetMs
+
+		if frames > f.maxFrames {
+			frames = f.maxFrames
+		}
 	}
 
 	f.frameCount += frames
