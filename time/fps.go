@@ -67,16 +67,19 @@ func (f *FPS) Update() (frames int) {
 	f.currentTime = now
 	f.deltaTime = f.currentTime - previousTime
 
+	if f.deltaTime < 0 {
+		f.deltaTime = 0
+	}
+
 	f.elapsedTime += f.deltaTime
 	f.deltaSeconds = float64(f.deltaTime) / 1000.0
 
 	frames = int(stdmath.Floor(f.elapsedTime / f.targetMs))
 	if frames > 0 {
-		f.elapsedTime -= float64(frames) * f.targetMs
-
 		if frames > f.maxFrames {
 			frames = f.maxFrames
 		}
+		f.elapsedTime -= float64(frames) * f.targetMs
 	}
 
 	f.frameCount += frames
@@ -87,7 +90,6 @@ func (f *FPS) Update() (frames int) {
 		f.frameCount = 0
 		f.lastFpsUpdate = now
 	}
-
 	return frames
 }
 
