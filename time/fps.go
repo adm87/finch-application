@@ -89,6 +89,7 @@ func (f *FPS) FixedDeltaSeconds() float64 {
 	return f.fixedDeltaSeconds
 }
 
+// Interpolation calculates the interpolation factor for the current frame.
 func (f *FPS) Interpolation() float64 {
 	now := float64(stdtime.Now().UnixMilli())
 

@@ -61,13 +61,13 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 	}
 
 	if metadata := app.Config().Metadata; metadata != nil {
-		cmd.PersistentFlags().StringVar(&app.Config().Root, "root", ".", "Root directory for the application")
+		cmd.PersistentFlags().StringVar(&metadata.Root, "root", ".", "Root directory for the application")
 	}
 
 	if window := app.Config().Window; window != nil {
-		cmd.PersistentFlags().IntVar(&app.Config().Width, "window-width", 800, "Width of the application window")
-		cmd.PersistentFlags().IntVar(&app.Config().Height, "window-height", 600, "Height of the application window")
-		cmd.PersistentFlags().BoolVar(&app.Config().Fullscreen, "fullscreen", false, "Run the application in fullscreen mode")
+		cmd.PersistentFlags().IntVar(&window.Width, "window-width", 800, "Width of the application window")
+		cmd.PersistentFlags().IntVar(&window.Height, "window-height", 600, "Height of the application window")
+		cmd.PersistentFlags().BoolVar(&window.Fullscreen, "fullscreen", false, "Run the application in fullscreen mode")
 	}
 
 	if resources := app.Config().Resources; resources != nil {

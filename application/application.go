@@ -142,21 +142,20 @@ func (app *Application) Update() error {
 		return app.internal_shutdown()
 	}
 
-	frames := app.fps.Update()
+	fixedFrames := app.fps.Update()
 
 	if err := app.world.EarlyUpdate(app.fps.DeltaSeconds()); err != nil {
 		return err
 	}
 
-	if frames > 0 {
+	if fixedFrames > 0 {
 		const maxFixedUpdates = 5
-		if frames > maxFixedUpdates {
-			frames = maxFixedUpdates
+		if fixedFrames > maxFixedUpdates {
+			fixedFrames = maxFixedUpdates
 		}
 
 		fixedDeltaSeconds := app.fps.FixedDeltaSeconds()
-
-		for i := 0; i < frames; i++ {
+		for i := 0; i < fixedFrames; i++ {
 			if err := app.world.FixedUpdate(fixedDeltaSeconds); err != nil {
 				return err
 			}
