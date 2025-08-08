@@ -132,8 +132,9 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (app *Application) Draw(screen *ebiten.Image) {
-	screen.Fill(app.clearColor)
-
+	if window := app.Config().Window; window != nil && window.ClearBackground {
+		screen.Fill(window.ClearColor)
+	}
 	app.world.Render(screen, app.fps.Interpolation())
 }
 

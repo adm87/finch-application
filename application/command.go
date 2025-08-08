@@ -61,18 +61,18 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 	}
 
 	if metadata := app.Config().Metadata; metadata != nil {
-		cmd.PersistentFlags().StringVar(&metadata.Root, "root", ".", "Root directory for the application")
+		cmd.PersistentFlags().StringVar(&metadata.Root, "root", metadata.Root, "Root directory for the application")
 	}
 
 	if window := app.Config().Window; window != nil {
-		cmd.PersistentFlags().IntVar(&window.Width, "window-width", 800, "Width of the application window")
-		cmd.PersistentFlags().IntVar(&window.Height, "window-height", 600, "Height of the application window")
-		cmd.PersistentFlags().BoolVar(&window.Fullscreen, "fullscreen", false, "Run the application in fullscreen mode")
+		cmd.PersistentFlags().IntVar(&window.Width, "window-width", window.Width, "Width of the application window")
+		cmd.PersistentFlags().IntVar(&window.Height, "window-height", window.Height, "Height of the application window")
+		cmd.PersistentFlags().BoolVar(&window.Fullscreen, "fullscreen", window.Fullscreen, "Run the application in fullscreen mode")
 	}
 
 	if resources := app.Config().Resources; resources != nil {
-		cmd.PersistentFlags().StringVar(&resources.Path, "resources-path", "data/", "Path to resources directory")
-		cmd.PersistentFlags().StringVar(&resources.ManifestName, "manifest-name", "manifest.json", "Name of the resource manifest file")
+		cmd.PersistentFlags().StringVar(&resources.Path, "resources-path", resources.Path, "Path to resources directory")
+		cmd.PersistentFlags().StringVar(&resources.ManifestName, "manifest-name", resources.ManifestName, "Name of the resource manifest file")
 	}
 
 	return cmd

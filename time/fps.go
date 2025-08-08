@@ -1,6 +1,7 @@
 package time
 
 import (
+	stdmath "math"
 	stdtime "time"
 
 	"github.com/adm87/finch-core/errors"
@@ -64,7 +65,7 @@ func (f *FPS) Update() (frames int) {
 	f.elapsedTime += f.deltaTime
 	f.deltaSeconds = float64(f.deltaTime) / 1000.0
 
-	frames = int(f.elapsedTime / f.targetMs)
+	frames = int(stdmath.Floor(f.elapsedTime / f.targetMs))
 	if frames > 0 {
 		f.elapsedTime -= float64(frames) * f.targetMs
 	}
