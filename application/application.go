@@ -10,8 +10,8 @@ import (
 )
 
 type StartupShutdownFunc func(app *Application) error
-type DrawFunc func(screen *ebiten.Image) error
-type UpdateFunc func(dt, fdt float64, frames int) error
+type DrawFunc func(app *Application, screen *ebiten.Image) error
+type UpdateFunc func(app *Application, dt, fdt float64, frames int) error
 
 type ApplicationConfig struct {
 	*config.Metadata
@@ -155,7 +155,7 @@ func (app *Application) Draw(screen *ebiten.Image) {
 	}
 
 	if app.drawFunc != nil {
-		if err := app.drawFunc(screen); err != nil {
+		if err := app.drawFunc(app, screen); err != nil {
 			panic(err)
 		}
 	}
@@ -170,7 +170,7 @@ func (app *Application) Update() error {
 	deltaSeconds, fixedDeltaSeconds, frames := app.fps.Update()
 
 	if app.updateFunc != nil {
-		if err := app.updateFunc(deltaSeconds, fixedDeltaSeconds, frames); err != nil {
+		if err := app.updateFunc(app, deltaSeconds, fixedDeltaSeconds, frames); err != nil {
 			panic(err)
 		}
 	}
