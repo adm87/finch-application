@@ -5,10 +5,13 @@ import (
 
 	"github.com/adm87/finch-application/config"
 	"github.com/adm87/finch-application/time"
-	"github.com/adm87/finch-core/ecs"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+type StartupShutdownFunc func(app *Application) error
+type DrawFunc func(screen *ebiten.Image) error
+type UpdateFunc func(dt, fdt float64, frames int) error
 
 type ApplicationConfig struct {
 	*config.Metadata
@@ -19,8 +22,10 @@ type ApplicationConfig struct {
 type Application struct {
 	config *ApplicationConfig
 
-	startupFunc  func(app *Application) error
-	shutdownFunc func(app *Application) error
+	startupFunc  StartupShutdownFunc
+	shutdownFunc StartupShutdownFunc
+	drawFunc     DrawFunc
+	updateFunc   UpdateFunc
 
 	cache *storage.ResourceCache
 	fps   *time.FPS
@@ -66,13 +71,23 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 	}
 }
 
-func (app *Application) WithStartup(fn func(app *Application) error) *Application {
+func (app *Application) WithStartup(fn StartupShutdownFunc) *Application {
 	app.startupFunc = fn
 	return app
 }
 
-func (app *Application) WithShutdown(fn func(app *Application) error) *Application {
+func (app *Application) WithShutdown(fn StartupShutdownFunc) *Application {
 	app.shutdownFunc = fn
+	return app
+}
+
+func (app *Application) WithDraw(fn DrawFunc) *Application {
+	app.drawFunc = fn
+	return app
+}
+
+func (app *Application) WithUpdate(fn UpdateFunc) *Application {
+	app.updateFunc = fn
 	return app
 }
 
@@ -138,12 +153,27 @@ func (app *Application) Draw(screen *ebiten.Image) {
 	if window := app.Config().Window; window != nil && window.ClearBackground {
 		screen.Fill(window.ClearColor)
 	}
-	ecs.ProcessRenderSystems(screen, app.renderMatrix)
+
+	if app.drawFunc != nil {
+		if err := app.drawFunc(screen); err != nil {
+			panic(err)
+		}
+	}
+
 }
 
 func (app *Application) Update() error {
 	if app.shouldExit {
 		return app.internal_shutdown()
 	}
-	return ecs.ProcessUpdateSystems(app.fps.Update())
+
+	deltaSeconds, fixedDeltaSeconds, frames := app.fps.Update()
+
+	if app.updateFunc != nil {
+		if err := app.updateFunc(deltaSeconds, fixedDeltaSeconds, frames); err != nil {
+			panic(err)
+		}
+	}
+
+	return nil
 }
