@@ -56,7 +56,7 @@ func (f *FPS) Start() {
 // Update calculates the FPS based on the elapsed time.
 //
 // It returns the number of fixed frames that occurred since the last update.
-func (f *FPS) Update() (frames int) {
+func (f *FPS) Update() (deltaSeconds, fixedDeltaSeconds float64, frames int) {
 	if f.startTime == 0 {
 		f.Start()
 	}
@@ -90,7 +90,7 @@ func (f *FPS) Update() (frames int) {
 		f.frameCount = 0
 		f.lastFpsUpdate = now
 	}
-	return frames
+	return f.deltaSeconds, f.fixedDeltaSeconds, frames
 }
 
 func (f *FPS) DeltaSeconds() float64 {

@@ -23,7 +23,6 @@ type Application struct {
 	shutdownFunc func(app *Application) error
 
 	cache *storage.ResourceCache
-	world *ecs.World
 	fps   *time.FPS
 
 	shouldExit bool
@@ -60,7 +59,6 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 	return &Application{
 		config:     config,
 		cache:      storage.NewResourceCache(),
-		world:      ecs.NewWorld(),
 		fps:        time.NewFPS(config.TargetFps, 5),
 		shouldExit: false,
 		clearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
@@ -79,10 +77,6 @@ func (app *Application) WithShutdown(fn func(app *Application) error) *Applicati
 
 func (app *Application) Cache() *storage.ResourceCache {
 	return app.cache
-}
-
-func (app *Application) World() *ecs.World {
-	return app.world
 }
 
 func (app *Application) Config() *ApplicationConfig {
@@ -135,15 +129,12 @@ func (app *Application) Draw(screen *ebiten.Image) {
 	if window := app.Config().Window; window != nil && window.ClearBackground {
 		screen.Fill(window.ClearColor)
 	}
-	app.world.Render(screen, app.fps.Interpolation())
+	ecs.ProcessRenderSystems(screen, ebiten.GeoM{})
 }
 
 func (app *Application) Update() error {
 	if app.shouldExit {
 		return app.internal_shutdown()
 	}
-
-	fixedFrames := app.fps.Update()
-
-	return app.world.Update(app.fps.DeltaSeconds(), app.fps.FixedDeltaSeconds(), fixedFrames)
+	return ecs.ProcessUpdateSystems(app.fps.Update())
 }
