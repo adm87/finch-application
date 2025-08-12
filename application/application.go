@@ -30,9 +30,8 @@ type Application struct {
 	cache *storage.ResourceCache
 	fps   *time.FPS
 
-	shouldExit   bool
-	clearColor   color.RGBA
-	renderMatrix ebiten.GeoM
+	shouldExit bool
+	clearColor color.RGBA
 }
 
 func NewApplication() *Application {
@@ -97,14 +96,6 @@ func (app *Application) Cache() *storage.ResourceCache {
 
 func (app *Application) Config() *ApplicationConfig {
 	return app.config
-}
-
-func (app *Application) RenderMatrix() ebiten.GeoM {
-	return app.renderMatrix
-}
-
-func (app *Application) SetRenderMatrix(matrix ebiten.GeoM) {
-	app.renderMatrix = matrix
 }
 
 func (app *Application) Open() error {
