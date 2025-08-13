@@ -162,7 +162,7 @@ func (app *Application) Update() error {
 
 	if app.updateFunc != nil {
 		if err := app.updateFunc(app, deltaSeconds, fixedDeltaSeconds, frames); err != nil {
-			panic(err)
+			return err
 		}
 	}
 
