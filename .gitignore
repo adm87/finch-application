@@ -14,5 +14,8 @@
 !config/
 !config/**/*
 
+!messages/
+!messages/**/*
+
 !time/
 !time/**/*

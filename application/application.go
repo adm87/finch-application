@@ -4,7 +4,9 @@ import (
 	"image/color"
 
 	"github.com/adm87/finch-application/config"
+	"github.com/adm87/finch-application/messages"
 	"github.com/adm87/finch-application/time"
+	"github.com/adm87/finch-core/geometry"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -32,6 +34,9 @@ type Application struct {
 
 	shouldExit bool
 	clearColor color.RGBA
+
+	activeWidth  float32
+	activeHeight float32
 }
 
 func NewApplication() *Application {
@@ -62,11 +67,13 @@ func NewApplication() *Application {
 
 func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 	return &Application{
-		config:     config,
-		cache:      storage.NewResourceCache(),
-		fps:        time.NewFPS(config.TargetFps, 5),
-		shouldExit: false,
-		clearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
+		config:       config,
+		cache:        storage.NewResourceCache(),
+		fps:          time.NewFPS(config.TargetFps, 5),
+		shouldExit:   false,
+		clearColor:   color.RGBA{R: 0, G: 0, B: 0, A: 255},
+		activeWidth:  0,
+		activeHeight: 0,
 	}
 }
 
@@ -134,9 +141,22 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 	if window := app.Config().Window; window != nil {
 		window.ScreenWidth = float32(outsideWidth) * window.RenderScale
 		window.ScreenHeight = float32(outsideHeight) * window.RenderScale
+
+		if app.activeWidth != window.ScreenWidth || app.activeHeight != window.ScreenHeight {
+			fromWidth := app.activeWidth
+			fromHeight := app.activeHeight
+
+			app.activeWidth = window.ScreenWidth
+			app.activeHeight = window.ScreenHeight
+
+			messages.ApplicationResize.Send(messages.ApplicationResizeMessage{
+				To:   geometry.Point{X: window.ScreenWidth, Y: window.ScreenHeight},
+				From: geometry.Point{X: fromWidth, Y: fromHeight},
+			})
+		}
+
 		return int(window.ScreenWidth), int(window.ScreenHeight)
 	}
-
 	return outsideWidth, outsideHeight
 }
 
