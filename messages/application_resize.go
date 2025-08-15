@@ -1,8 +1,8 @@
 package messages
 
 import (
+	"github.com/adm87/finch-core/events"
 	"github.com/adm87/finch-core/geometry"
-	"github.com/adm87/finch-core/messaging"
 )
 
 type ApplicationResizeMessage struct {
@@ -10,4 +10,4 @@ type ApplicationResizeMessage struct {
 	From geometry.Point
 }
 
-var ApplicationResize = messaging.NewMessageBus[ApplicationResizeMessage]()
+var ApplicationResize = events.NewMessageBus[ApplicationResizeMessage]()

@@ -141,6 +141,7 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 	if window := app.Config().Window; window != nil {
 		window.ScreenWidth = float32(outsideWidth) * window.RenderScale
 		window.ScreenHeight = float32(outsideHeight) * window.RenderScale
+
 		if app.activeWidth != window.ScreenWidth || app.activeHeight != window.ScreenHeight {
 			fromWidth := app.activeWidth
 			fromHeight := app.activeHeight
@@ -153,6 +154,7 @@ func (app *Application) Layout(outsideWidth, outsideHeight int) (int, int) {
 				From: geometry.Point{X: fromWidth, Y: fromHeight},
 			})
 		}
+
 		return int(window.ScreenWidth), int(window.ScreenHeight)
 	}
 	return outsideWidth, outsideHeight
