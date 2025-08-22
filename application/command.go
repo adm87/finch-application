@@ -5,6 +5,7 @@ import (
 
 	"github.com/adm87/finch-core/errors"
 	"github.com/adm87/finch-resources/manifest"
+	"github.com/adm87/finch-resources/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +49,7 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 					return err
 				}
 
-				app.Cache().SetManifest(m)
+				storage.SetManifest(m)
 			}
 
 			return nil

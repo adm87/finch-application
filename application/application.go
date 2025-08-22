@@ -7,7 +7,6 @@ import (
 	"github.com/adm87/finch-application/messages"
 	"github.com/adm87/finch-application/time"
 	"github.com/adm87/finch-core/geometry"
-	"github.com/adm87/finch-resources/storage"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -29,8 +28,7 @@ type Application struct {
 	drawFunc     DrawFunc
 	updateFunc   UpdateFunc
 
-	cache *storage.ResourceCache
-	fps   *time.FPS
+	fps *time.FPS
 
 	shouldExit bool
 	clearColor color.RGBA
@@ -68,7 +66,6 @@ func NewApplication() *Application {
 func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 	return &Application{
 		config:       config,
-		cache:        storage.NewResourceCache(),
 		fps:          time.NewFPS(config.TargetFps, 5),
 		shouldExit:   false,
 		clearColor:   color.RGBA{R: 0, G: 0, B: 0, A: 255},
@@ -95,10 +92,6 @@ func (app *Application) WithDraw(fn DrawFunc) *Application {
 func (app *Application) WithUpdate(fn UpdateFunc) *Application {
 	app.updateFunc = fn
 	return app
-}
-
-func (app *Application) Cache() *storage.ResourceCache {
-	return app.cache
 }
 
 func (app *Application) Config() *ApplicationConfig {
