@@ -127,7 +127,7 @@ func (app *Application) Open() error {
 	return ebiten.RunGame(app)
 }
 
-func (app *Application) Quit() {
+func (app *Application) Close() {
 	app.shouldExit = true
 }
 
