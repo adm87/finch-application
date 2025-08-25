@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type RegistrationFunc func(app *Application) error
 type StartupShutdownFunc func(app *Application) error
 type DrawFunc func(app *Application, screen *ebiten.Image) error
 type UpdateFunc func(app *Application, dt, fdt float64, frames int) error
@@ -23,10 +24,11 @@ type ApplicationConfig struct {
 type Application struct {
 	config *ApplicationConfig
 
-	startupFunc  StartupShutdownFunc
-	shutdownFunc StartupShutdownFunc
-	drawFunc     DrawFunc
-	updateFunc   UpdateFunc
+	registrationFunc RegistrationFunc
+	startupFunc      StartupShutdownFunc
+	shutdownFunc     StartupShutdownFunc
+	drawFunc         DrawFunc
+	updateFunc       UpdateFunc
 
 	fps *time.FPS
 
@@ -74,6 +76,11 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 	}
 }
 
+func (app *Application) WithRegistration(fn RegistrationFunc) *Application {
+	app.registrationFunc = fn
+	return app
+}
+
 func (app *Application) WithStartup(fn StartupShutdownFunc) *Application {
 	app.startupFunc = fn
 	return app
@@ -99,6 +106,11 @@ func (app *Application) Config() *ApplicationConfig {
 }
 
 func (app *Application) Open() error {
+	if app.registrationFunc != nil {
+		if err := app.registrationFunc(app); err != nil {
+			return err
+		}
+	}
 	if window := app.Config().Window; window != nil {
 		ebiten.SetWindowTitle(window.Title)
 		ebiten.SetWindowSize(window.Width, window.Height)
