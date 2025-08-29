@@ -1,6 +1,7 @@
 package application
 
 import (
+	"path"
 	"path/filepath"
 
 	"github.com/adm87/finch-core/errors"
@@ -21,7 +22,7 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			app.Config().Root = root
+			app.Config().Root = filepath.ToSlash(root)
 
 			if window := app.Config().Window; window != nil {
 				if window.Width <= 0 || window.Height <= 0 {
@@ -36,13 +37,13 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 			}
 
 			if resources := app.Config().Resources; resources != nil {
-				resources.Path = filepath.Join(root, resources.Path)
+				resources.Path = path.Join(root, resources.Path)
 
 				if resources.ManifestName == "" {
 					resources.ManifestName = "manifest.json"
 				}
 
-				manifestPath := filepath.Join(resources.Path, resources.ManifestName)
+				manifestPath := path.Join(resources.Path, resources.ManifestName)
 				m, err := manifest.LoadManifest(manifestPath)
 
 				if err != nil {
