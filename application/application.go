@@ -101,6 +101,14 @@ func (app *Application) WithUpdate(fn UpdateFunc) *Application {
 	return app
 }
 
+func (app *Application) SetTitleContext(ctx string) {
+	title := app.Config().Window.Title
+	if ctx != "" {
+		title = title + " - " + ctx
+	}
+	ebiten.SetWindowTitle(title)
+}
+
 func (app *Application) Config() *ApplicationConfig {
 	return app.config
 }
