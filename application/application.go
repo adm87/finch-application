@@ -6,6 +6,7 @@ import (
 	"github.com/adm87/finch-application/config"
 	"github.com/adm87/finch-application/messages"
 	"github.com/adm87/finch-application/time"
+	"github.com/adm87/finch-core/events"
 	"github.com/adm87/finch-core/geometry"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -30,13 +31,13 @@ type Application struct {
 	drawFunc         DrawFunc
 	updateFunc       UpdateFunc
 
-	fps *time.FPS
+	fps          *time.FPS
+	commandStack *events.CommandStack
 
-	shouldExit bool
-	clearColor color.RGBA
-
+	shouldExit   bool
 	activeWidth  float32
 	activeHeight float32
+	clearColor   color.RGBA
 }
 
 func NewApplication() *Application {
@@ -69,6 +70,7 @@ func NewApplicationWithConfig(config *ApplicationConfig) *Application {
 	return &Application{
 		config:       config,
 		fps:          time.NewFPS(config.TargetFps, 5),
+		commandStack: events.NewCommandStack(1000),
 		shouldExit:   false,
 		clearColor:   color.RGBA{R: 0, G: 0, B: 0, A: 255},
 		activeWidth:  0,
@@ -99,6 +101,10 @@ func (app *Application) WithDraw(fn DrawFunc) *Application {
 func (app *Application) WithUpdate(fn UpdateFunc) *Application {
 	app.updateFunc = fn
 	return app
+}
+
+func (app *Application) CommandStack() *events.CommandStack {
+	return app.commandStack
 }
 
 func (app *Application) SetTitleContext(ctx string) {
@@ -137,6 +143,10 @@ func (app *Application) Open() error {
 
 func (app *Application) Close() {
 	app.shouldExit = true
+}
+
+func (app *Application) Closing() bool {
+	return app.shouldExit
 }
 
 func (app *Application) internal_shutdown() error {
