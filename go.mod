@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/ebitengine/purego v0.8.0 // indirect
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
 	github.com/jezek/xgb v1.1.1 // indirect
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 )
