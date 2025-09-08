@@ -3,8 +3,8 @@ module github.com/adm87/finch-application
 go 1.24.3
 
 require (
-	github.com/adm87/finch-core v0.0.0-20250814152244-9829a27e9698
-	github.com/adm87/finch-resources v0.0.0-20250801010448-71fa6bbc8e79
+	github.com/adm87/finch-core v0.0.0-20250904015001-f524ebaf1b6e
+	github.com/adm87/finch-resources v0.0.0-20250908213539-511554329af8
 )
 
 require (
