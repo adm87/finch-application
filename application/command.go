@@ -30,9 +30,8 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 					return errors.NewInvalidArgumentError("window width and height must be non-zero positive integers")
 				}
 				if window.RenderScale <= 0 {
-					return errors.NewInvalidArgumentError("window render scale must be a non-zero positive integer")
+					window.RenderScale = 1.0
 				}
-
 				window.ScreenWidth = float32(window.Width) * window.RenderScale
 				window.ScreenHeight = float32(window.Height) * window.RenderScale
 			}
