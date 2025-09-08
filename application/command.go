@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/adm87/finch-core/errors"
+	"github.com/adm87/finch-core/fsys"
 	"github.com/adm87/finch-resources/manifest"
 	"github.com/adm87/finch-resources/storage"
 	"github.com/spf13/cobra"
@@ -44,13 +45,16 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 				}
 
 				manifestPath := path.Join(resources.Path, resources.ManifestName)
-				m, err := manifest.LoadManifest(manifestPath)
 
-				if err != nil {
-					return err
+				if fsys.Exists(manifestPath) {
+					m, err := manifest.LoadManifest(manifestPath)
+
+					if err != nil {
+						return err
+					}
+
+					storage.SetManifest(m)
 				}
-
-				storage.SetManifest(m)
 			}
 
 			return nil
