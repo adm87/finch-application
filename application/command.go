@@ -7,7 +7,7 @@ import (
 	"github.com/adm87/finch-core/errors"
 	"github.com/adm87/finch-core/fsys"
 	"github.com/adm87/finch-resources/manifest"
-	"github.com/adm87/finch-resources/storage"
+	"github.com/adm87/finch-resources/resources"
 	"github.com/spf13/cobra"
 )
 
@@ -36,14 +36,14 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 				window.ScreenHeight = float32(window.Height) * window.RenderScale
 			}
 
-			if resources := app.Config().Resources; resources != nil {
-				resources.Path = path.Join(root, resources.Path)
+			if res := app.Config().Resources; res != nil {
+				res.Path = path.Join(root, res.Path)
 
-				if resources.ManifestName == "" {
-					resources.ManifestName = "manifest.json"
+				if res.ManifestName == "" {
+					res.ManifestName = "manifest.json"
 				}
 
-				manifestPath := path.Join(resources.Path, resources.ManifestName)
+				manifestPath := path.Join(res.Path, res.ManifestName)
 
 				if fsys.Exists(manifestPath) {
 					m, err := manifest.LoadManifest(manifestPath)
@@ -52,7 +52,7 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 						return err
 					}
 
-					storage.SetManifest(m)
+					resources.SetManifest(m)
 				}
 			}
 
@@ -75,9 +75,9 @@ func NewApplicationCommand(use string, app *Application) *cobra.Command {
 		cmd.PersistentFlags().BoolVar(&window.Fullscreen, "fullscreen", window.Fullscreen, "Run the application in fullscreen mode")
 	}
 
-	if resources := app.Config().Resources; resources != nil {
-		cmd.PersistentFlags().StringVar(&resources.Path, "resources-path", resources.Path, "Path to resources directory")
-		cmd.PersistentFlags().StringVar(&resources.ManifestName, "manifest-name", resources.ManifestName, "Name of the resource manifest file")
+	if res := app.Config().Resources; res != nil {
+		cmd.PersistentFlags().StringVar(&res.Path, "resources-path", res.Path, "Path to resources directory")
+		cmd.PersistentFlags().StringVar(&res.ManifestName, "manifest-name", res.ManifestName, "Name of the resource manifest file")
 	}
 
 	return cmd
